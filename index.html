@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hotel Booking Demand Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="eyebrow">Decision dashboard · cleaned booking file</div>
+    <h1>Hotel Booking Demand Intelligence</h1>
+    <p class="sub">
+      Built from the cleaned dataset and three prior studies:
+      <strong>Data Analysis 1</strong>, <strong>Data Analysis 2</strong>, and <strong>Data Analysis 3</strong>.
+      Use the tabs in order: measure portfolio health, then seasonality, then channel quality, then arrival-risk signals, then act on recommendations.
+    </p>
+    <div class="chips">
+      <span class="chip">86,618 bookings</span>
+      <span class="chip">Arrival years 2023–2025</span>
+      <span class="chip">Revenue = ADR × nights stayed</span>
+      <span class="chip">Data Analysis 1 · 2 · 3</span>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Dashboard sections">
+    <button class="active" data-view="view-health" role="tab" aria-selected="true">1. Portfolio health</button>
+    <button data-view="view-season" role="tab" aria-selected="false">2. Season &amp; pricing</button>
+    <button data-view="view-channel" role="tab" aria-selected="false">3. Channels &amp; guest mix</button>
+    <button data-view="view-risk" role="tab" aria-selected="false">4. Arrival-risk signals</button>
+    <button data-view="view-decide" role="tab" aria-selected="false">5. Insights &amp; recommendations</button>
+  </nav>
+
+  <main>
+    <section id="view-health" class="view active" aria-labelledby="h-health">
+      <h2>Is reported volume translating into stays and revenue?</h2>
+      <p class="lede">Start here. Gross bookings overstate the business. Compare cancel rate, realized stays, and revenue sitting in canceled reservations before you plan staff, inventory, or OTA spend.</p>
+      <div class="grid kpi-row">
+        <article class="card kpi"><div class="label">Gross bookings</div><div class="value" id="kpi-bookings">—</div><div class="delta" id="kpi-bookings-sub"></div></article>
+        <article class="card kpi"><div class="label">Cancellation rate</div><div class="value" id="kpi-cancel">—</div><div class="delta" id="kpi-cancel-sub"></div></article>
+        <article class="card kpi"><div class="label">Realized stays</div><div class="value" id="kpi-realized">—</div><div class="delta">Guests who were not canceled</div></article>
+        <article class="card kpi"><div class="label">Average daily rate</div><div class="value" id="kpi-adr">—</div><div class="delta" id="kpi-adr-sub"></div></article>
+        <article class="card kpi"><div class="label">Stay length</div><div class="value" id="kpi-nights">—</div><div class="delta">Mean weekend + weekday nights</div></article>
+        <article class="card kpi"><div class="label">Revenue in canceled stays</div><div class="value" id="kpi-rar">—</div><div class="delta">ADR × nights on canceled rows</div></article>
+      </div>
+
+      <div class="grid two" style="margin-top:14px">
+        <figure class="card">
+          <h3>Year-by-year: volume grew, then price and wash took over</h3>
+          <div class="chart-box"><canvas id="chart-year" role="img" aria-label="Bookings, ADR and cancellation rate for 2023, 2024 and 2025"></canvas></div>
+          <figcaption>2024 is the volume peak. 2025 is smaller, more expensive, and more likely to cancel. Read this as a quality warning, not only a rate win.</figcaption>
+        </figure>
+        <figure class="card">
+          <h3>City vs resort: where the book sits</h3>
+          <div class="chart-box"><canvas id="chart-hotel" role="img" aria-label="City Hotel versus Resort Hotel booking share and cancellation"></canvas></div>
+          <figcaption>City hotels are 61.2% of bookings and cancel more (30.2%) than resorts (23.7%). City inventory is the first place to apply OTA fences.</figcaption>
+        </figure>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h3>Numbers behind the charts</h3>
+        <table>
+          <thead>
+            <tr><th>Cut</th><th class="num">Bookings</th><th class="num">Canceled</th><th class="num">Cancel %</th><th class="num">ADR</th><th class="num">Avg nights</th><th class="num">Revenue at risk</th></tr>
+          </thead>
+          <tbody id="tbl-health"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="view-season" class="view" aria-labelledby="h-season">
+      <h2>When should we protect rate, and when should we buy occupancy?</h2>
+      <p class="lede">August is the commercial peak in both volume and ADR. January is the baseline. Cancel rate rises with price through summer, so peak weeks need different rules than winter.</p>
+      <figure class="card">
+        <h3>Monthly bookings, ADR, and cancellation rate</h3>
+        <div class="chart-box tall"><canvas id="chart-month" role="img" aria-label="Monthly bookings as bars with ADR and cancellation rate as lines"></canvas></div>
+        <figcaption>August: 11,194 bookings, $151.70 ADR, 32.4% cancel, $2.63M of room revenue sitting in canceled stays. November–January stay near 21–22% cancel — that is the volume-first window.</figcaption>
+      </figure>
+      <div class="grid three" style="margin-top:14px">
+        <div class="callout watch"><strong>July–August (protect):</strong> Highest ADR and highest wash. Apply minimum length of stay and deposits on long-lead Online TA. Source: Data Analysis 3, confirmed in the file.</div>
+        <div class="callout"><strong>April–June / September (watch):</strong> ADR already high and cancel ~24–30%. Start the 7–14 day confirmation filter before peak.</div>
+        <div class="callout action"><strong>November–January (fill):</strong> Lowest cancel (~21–22%) and lowest ADR. Flexible terms and Direct offers are safer here than in August.</div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h3>Month detail</h3>
+        <table>
+          <thead><tr><th>Month</th><th class="num">Bookings</th><th class="num">Cancel %</th><th class="num">ADR</th><th class="num">Avg nights</th><th class="num">Gross revenue</th><th class="num">In canceled stays</th></tr></thead>
+          <tbody id="tbl-month"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="view-channel" class="view" aria-labelledby="h-channel">
+      <h2>Which channels and guest types produce stays we can keep?</h2>
+      <p class="lede">Online TA is 59.2% of bookings and 35.5% cancel. Direct has almost the same ADR (~$118) with 14.8% cancel. Couples dominate volume; families are fewer but more expensive and more likely to cancel.</p>
+      <div class="grid equal">
+        <figure class="card">
+          <h3>Market segment: volume vs ADR vs cancel</h3>
+          <div class="chart-box tall"><canvas id="chart-segment" role="img" aria-label="Bookings by market segment with ADR and cancellation rate"></canvas></div>
+          <figcaption>Quality per booking ≈ ADR × stay chance × nights. Direct and Offline TA/TO keep more of what they book than Online TA.</figcaption>
+        </figure>
+        <figure class="card">
+          <h3>Agent 9 vs Direct vs other agents</h3>
+          <div class="chart-box tall"><canvas id="chart-agents" role="img" aria-label="Realized versus canceled bookings by agent group"></canvas></div>
+          <figcaption>Agent 9: 28,652 bookings, 40.2% canceled. Direct (no agent): 11,947 bookings, 12.8% canceled. Gross OTA volume is not net demand.</figcaption>
+        </figure>
+      </div>
+      <figure class="card" style="margin-top:14px">
+        <h3>Party type</h3>
+        <div class="chart-box"><canvas id="chart-party" role="img" aria-label="Bookings, ADR and cancel rate by party type"></canvas></div>
+        <figcaption>Couples = 56,222 bookings (64.9%). Families = 9,065 bookings, $155.56 ADR, 34.4% cancel — high value, high wash.</figcaption>
+      </figure>
+      <div class="card" style="margin-top:14px">
+        <h3>Channel and guest-mix table (expected kept revenue per booking = ADR × (1 − cancel) × nights)</h3>
+        <table>
+          <thead><tr><th>Group</th><th class="num">Bookings</th><th class="num">Share</th><th class="num">Cancel %</th><th class="num">ADR</th><th class="num">Expected kept $</th></tr></thead>
+          <tbody id="tbl-channel"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="view-risk" class="view" aria-labelledby="h-risk">
+      <h2>Which booking behaviors predict that the guest will actually arrive?</h2>
+      <p class="lede">Lead time, parking, special requests, modifications, and room assignment separate arrivals better than “couple vs family.” Use these as a scoring list for overbooking and pre-arrival outreach.</p>
+      <div class="grid equal">
+        <figure class="card">
+          <h3>Lead time: cancel rises as the booking window lengthens</h3>
+          <div class="chart-box"><canvas id="chart-lead" role="img" aria-label="Cancellation rate and ADR by lead time bucket"></canvas></div>
+          <figcaption>0–7 days: 8.5% cancel. 181–360 days: 39.9% cancel. Long-horizon rooms are options, not guaranteed occupancy.</figcaption>
+        </figure>
+        <figure class="card">
+          <h3>Online TA vs Offline TA/TO by lead time</h3>
+          <div class="chart-box"><canvas id="chart-lead-ota" role="img" aria-label="Cancellation rate by lead time for Online TA versus Offline TA"></canvas></div>
+          <figcaption>In the cleaned file the Online TA jump is already visible at 31–60 days (39.1%), not only after 60 days. Offline TA stays near 10–21% even on long lead.</figcaption>
+        </figure>
+      </div>
+      <div class="grid equal" style="margin-top:14px">
+        <figure class="card">
+          <h3>Special requests vs cancellation</h3>
+          <div class="chart-box"><canvas id="chart-req" role="img" aria-label="Bookings and cancellation rate by number of special requests"></canvas></div>
+          <figcaption>Zero requests: 50.1% of the book, 33.5% cancel. One request: 22.5% cancel. Asking for one preference is a cheap intent test.</figcaption>
+        </figure>
+        <figure class="card">
+          <h3>Commitment flags (lower cancel = stronger arrival signal)</h3>
+          <div class="chart-box tall"><canvas id="chart-intent" role="img" aria-label="Cancellation rate for parking, room change, loyalty, modifications and Online TA"></canvas></div>
+          <figcaption>Parking requested: 0% cancel (7,290 bookings). Assigned ≠ reserved: 4.8%. Repeat guest: 8.2%. No parking: 30.2%. Online TA: 35.5%.</figcaption>
+        </figure>
+      </div>
+      <div class="grid three" style="margin-top:14px">
+        <div class="callout action"><strong>Parking:</strong> 8.4% of bookings request a space and none of those rows are canceled in this file. Use as a score and a booking prompt; it is association, not a proven causal lever.</div>
+        <div class="callout"><strong>Modifications:</strong> 18.1% change the booking and cancel at 15.6% vs 30.3% with zero changes.</div>
+        <div class="callout watch"><strong>Non Refund rows:</strong> only 1,037 bookings, and 94.7% are flagged canceled. That is prepaid forfeiture in this schema, not “the guest still came.” Do not read Non Refund as a low-cancel product.</div>
+      </div>
+    </section>
+
+    <section id="view-decide" class="view" aria-labelledby="h-decide">
+      <h2>What should we do next, and who owns it?</h2>
+      <p class="lede">Recommendations come from Data Analysis 3, checked against the cleaned file. Expected-stay math uses ADR × (1 − cancel) × nights from the Excel extract — not modeled commissions.</p>
+      <div class="grid two">
+        <div id="playbook"></div>
+        <article class="card sim">
+          <h3>Planning ranges (not a statistical forecast)</h3>
+          <p class="hint">Move sliders to see order-of-magnitude impact if mix and behavior shift toward the better segments already in the file.</p>
+          <label>Move this share of Online TA bookings onto Direct-like cancel rates <span id="lab-direct"></span></label>
+          <input id="sim-direct" type="range" min="0" max="20" value="5" />
+          <label>Fence this share of Online TA lead time &gt; 30 days (where cancel is already ~39%+) <span id="lab-fence"></span></label>
+          <input id="sim-fence" type="range" min="0" max="40" value="15" />
+          <label>Convert this share of first-time guests to repeat-guest cancel rates <span id="lab-loyal"></span></label>
+          <input id="sim-loyal" type="range" min="0" max="10" value="5" />
+          <div class="sim-out" id="sim-out"></div>
+        </article>
+      </div>
+    </section>
+  </main>
+  <footer>
+    Sources: Data Analysis 1, Data Analysis 2, Data Analysis 3, and hotel_bookings_fully_cleaned-official.xlsx (86,618 rows).
+    Chart colors: navy = volume, gold = ADR, burnt orange = cancellation. Every chart has a caption and a supporting table.
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
