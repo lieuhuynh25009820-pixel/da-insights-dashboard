@@ -23,6 +23,7 @@
       <span class="chip">Revenue = ADR × nights stayed</span>
       <span class="chip">Data Analysis 1 · 2 · 3</span>
       <a class="chip" href="cleaning-slides.html">Data cleaning slides</a>
+      <button class="chip filter-open" type="button" id="filter-open">Filters</button>
     </div>
   </header>
 
@@ -34,7 +35,102 @@
     <button data-view="view-decide" role="tab" aria-selected="false">5. Insights &amp; recommendations</button>
   </nav>
 
-  <main>
+  <div class="workspace">
+    <aside class="filter-panel" id="filter-panel" aria-label="Booking filters">
+      <div class="filter-head">
+        <div>
+          <h2>Booking filters</h2>
+          <p id="filter-status">No active filters</p>
+        </div>
+        <button type="button" class="filter-reset" id="filter-reset">Reset</button>
+      </div>
+      <div class="filter-label">Booking mix</div>
+      <label class="filter-field">Hotel type
+        <select id="f-hotel">
+          <option value="">All hotels</option>
+          <option value="0">City Hotel</option>
+          <option value="1">Resort Hotel</option>
+        </select>
+      </label>
+      <label class="filter-field">Arrival year
+        <select id="f-year">
+          <option value="">All years</option>
+          <option value="0">2023</option>
+          <option value="1">2024</option>
+          <option value="2">2025</option>
+        </select>
+      </label>
+      <label class="filter-field">Arrival month
+        <select id="f-month">
+          <option value="">All months</option>
+        </select>
+      </label>
+      <label class="filter-field">Market segment
+        <select id="f-seg">
+          <option value="">All segments</option>
+          <option value="0">Online TA</option>
+          <option value="1">Offline TA/TO</option>
+          <option value="2">Direct</option>
+          <option value="3">Groups</option>
+          <option value="4">Corporate</option>
+          <option value="5">Complementary</option>
+          <option value="6">Aviation</option>
+        </select>
+      </label>
+      <label class="filter-field">Party type
+        <select id="f-party">
+          <option value="">All party types</option>
+          <option value="0">Couple</option>
+          <option value="1">Solo</option>
+          <option value="2">Family</option>
+          <option value="3">Group / Other</option>
+        </select>
+      </label>
+      <label class="filter-field">Guest loyalty
+        <select id="f-loyal">
+          <option value="">All guests</option>
+          <option value="0">First-time</option>
+          <option value="1">Repeat</option>
+        </select>
+      </label>
+      <div class="filter-field">
+        <span>Lead time (days): <strong id="f-lead-lab">0–800</strong></span>
+        <div class="lead-sliders">
+          <input id="f-lead-min" type="range" min="0" max="800" value="0" />
+          <input id="f-lead-max" type="range" min="0" max="800" value="800" />
+        </div>
+      </div>
+      <button type="button" class="more-toggle" id="more-toggle" aria-expanded="false">More booking filters</button>
+      <div id="more-filters" hidden>
+        <label class="filter-field">Parking
+          <select id="f-park">
+            <option value="">All parking statuses</option>
+            <option value="0">No parking requested</option>
+            <option value="1">Parking requested</option>
+          </select>
+        </label>
+        <label class="filter-field">Deposit
+          <select id="f-deposit">
+            <option value="">All deposit types</option>
+            <option value="0">No Deposit</option>
+            <option value="1">Non Refund</option>
+            <option value="2">Refundable</option>
+          </select>
+        </label>
+        <label class="filter-field">Booking changes
+          <select id="f-change">
+            <option value="">All change statuses</option>
+            <option value="0">No changes</option>
+            <option value="1">Modified (1+)</option>
+          </select>
+        </label>
+      </div>
+      <div class="filter-result">
+        <div id="filter-count">86,618</div>
+        <div id="filter-pct">100.0% of all bookings</div>
+      </div>
+    </aside>
+    <div class="workspace-main">
     <section id="view-health" class="view active" aria-labelledby="h-health">
       <h2>Is reported volume translating into stays and revenue?</h2>
       <p class="lede">Start here. Gross bookings overstate the business. Compare cancel rate, realized stays, and revenue sitting in canceled reservations before you plan staff, inventory, or OTA spend.</p>
@@ -165,8 +261,11 @@
     </section>
 
     <section id="view-decide" class="view" aria-labelledby="h-decide">
-      <h2>What should we do next, and who owns it?</h2>
-      <p class="lede">Recommendations come from Data Analysis 3, checked against the cleaned file. Expected-stay math uses ADR × (1 − cancel) × nights from the Excel extract — not modeled commissions.</p>
+      <p class="eyebrow gold-eye">Insights &amp; solution</p>
+      <h2 id="h-decide">Main insights from the dashboard</h2>
+      <p class="lede">The evidence points to a portfolio-quality problem: demand exists, but not all demand converts into reliable stays. Cards below follow the current filters.</p>
+      <div id="insight-cards" class="insight-stack"></div>
+      <h3 class="sol-head">Recommended actions</h3>
       <div class="grid two">
         <div id="playbook"></div>
         <article class="card sim">
@@ -182,13 +281,16 @@
         </article>
       </div>
     </section>
-  </main>
-  <footer>
+    <footer>
     Sources: Data Analysis 1, Data Analysis 2, Data Analysis 3, and hotel_bookings_fully_cleaned-official.xlsx (86,618 rows).
     Chart colors: navy = volume, gold = ADR, burnt orange = cancellation. Every chart has a caption and a supporting table.
-  </footer>
+    </footer>
+    </div>
+  </div>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="data.js"></script>
+  <script src="bookings.js"></script>
+  <script src="compute.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
