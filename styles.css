@@ -19,7 +19,13 @@
 }
 
 * { box-sizing: border-box; }
-html, body { margin: 0; background: var(--paper); color: var(--ink); }
+html, body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  max-width: 100%;
+  overflow-x: hidden;
+}
 body { min-height: 100vh; line-height: 1.45; }
 
 .app-header {
@@ -39,6 +45,8 @@ body { min-height: 100vh; line-height: 1.45; }
   padding: 5px 12px;
   font-size: 0.8rem;
 }
+a.chip { text-decoration: none; display: inline-block; }
+a.chip:hover, a.chip:focus-visible { border-color: #f0d27a; color: #fff; }
 
 nav.tabs {
   display: flex;
@@ -46,6 +54,8 @@ nav.tabs {
   padding: 10px 28px 0;
   background: var(--navy-950);
   overflow-x: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 nav.tabs button {
   background: transparent;
@@ -77,7 +87,7 @@ main { padding: 18px 28px 40px; }
 .view h2 { font-size: 1.15rem; margin: 0 0 6px; }
 .lede { color: var(--muted); margin: 0 0 14px; max-width: 900px; }
 
-.grid { display: grid; gap: 14px; }
+.grid { display: grid; gap: 14px; min-width: 0; }
 .kpi-row { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 .two { grid-template-columns: 1.25fr 1fr; }
 .equal { grid-template-columns: 1fr 1fr; }
@@ -89,6 +99,8 @@ main { padding: 18px 28px 40px; }
   border-radius: 12px;
   padding: 16px 16px 14px;
   box-shadow: 0 1px 0 rgba(10, 37, 64, 0.04);
+  min-width: 0;
+  max-width: 100%;
 }
 .card h3 { margin: 0 0 8px; font-size: 1rem; color: var(--navy-900); }
 .card .hint { margin: 8px 0 0; color: var(--muted); font-size: 0.86rem; }
@@ -97,14 +109,28 @@ main { padding: 18px 28px 40px; }
 .kpi .value { font-size: 1.4rem; font-weight: 700; margin: 6px 0 4px; font-variant-numeric: tabular-nums; color: var(--navy-900); }
 .kpi .delta { font-size: 0.8rem; color: var(--muted); }
 
-.chart-box { position: relative; height: 340px; }
+.chart-box { position: relative; height: 340px; width: 100%; overflow: hidden; }
 .chart-box.tall { height: 400px; }
-figcaption { font-size: 0.82rem; color: var(--muted); margin-top: 8px; }
+.chart-box canvas { max-width: 100%; }
+figcaption { font-size: 0.82rem; color: var(--muted); margin-top: 8px; overflow-wrap: anywhere; }
 
+.swipe-hint {
+  display: none;
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
 table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
 th, td { padding: 8px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
-th { color: var(--navy-700); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
-td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+th { color: var(--navy-700); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 tbody tr:nth-child(even) { background: var(--navy-50); }
 
 .callout {
@@ -148,5 +174,25 @@ footer { padding: 0 28px 28px; color: var(--muted); font-size: 0.8rem; }
   .kpi-row, .two, .equal, .three { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 720px) {
+  .app-header, main, footer { padding-left: 16px; padding-right: 16px; }
+  .app-header { padding-top: 16px; padding-bottom: 14px; }
+  .app-header h1 { font-size: 1.22rem; }
+  .sub { font-size: 0.88rem; }
+  nav.tabs { padding-left: 8px; padding-right: 8px; }
+  nav.tabs button { font-size: 0.8rem; padding: 10px 10px; }
+  main { padding-top: 14px; padding-bottom: 28px; }
   .kpi-row, .two, .equal, .three { grid-template-columns: 1fr; }
+  .chart-box { height: 260px; }
+  .chart-box.tall { height: 280px; }
+  .swipe-hint { display: block; }
+  .table-wrap {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  table { min-width: 640px; }
+  .rec { grid-template-columns: 1fr; }
+  .rec .id { min-height: 44px; width: 100%; }
+  .view h2 { font-size: 1.05rem; }
+  .kpi .value { font-size: 1.25rem; }
+  footer { padding-bottom: 24px; overflow-wrap: anywhere; }
 }
