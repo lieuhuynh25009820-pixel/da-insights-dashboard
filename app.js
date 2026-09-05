@@ -8,8 +8,11 @@ const teal = "#1f7a66";
 Chart.defaults.color = "#0a2540";
 Chart.defaults.borderColor = "#c5d2e3";
 Chart.defaults.font.family = "Source Sans 3, Segoe UI, sans-serif";
-Chart.defaults.font.size = 12;
+Chart.defaults.font.size = window.matchMedia("(max-width: 720px)").matches ? 11 : 12;
 Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.boxWidth = 10;
+Chart.defaults.plugins.legend.labels.padding = 10;
+Chart.defaults.layout = { padding: { top: 4, right: 4, bottom: 0, left: 0 } };
 Chart.defaults.plugins.tooltip.backgroundColor = "#07192d";
 Chart.defaults.plugins.tooltip.titleColor = "#fff";
 Chart.defaults.plugins.tooltip.bodyColor = "#fff";
@@ -416,3 +419,11 @@ document.querySelectorAll(".view").forEach((v) => {
 });
 bindTabs();
 simulate();
+window.addEventListener("resize", () => {
+  requestAnimationFrame(() => {
+    document.querySelectorAll("canvas").forEach((c) => {
+      const ch = Chart.getChart(c);
+      if (ch) ch.resize();
+    });
+  });
+});
