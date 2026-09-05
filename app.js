@@ -1,4 +1,4 @@
-const D = window.DASHBOARD_DATA;
+let D = window.DASHBOARD_DATA;
 const navy = "#0a2540";
 const navyMid = "#1b4a73";
 const gold = "#b8860b";
@@ -38,18 +38,24 @@ function initKpis() {
   const k = D.kpis;
   document.getElementById("kpi-bookings").textContent = fmt.n(k.bookings);
   document.getElementById("kpi-bookings-sub").textContent =
-    `City ${fmt.n(k.city)} · Resort ${fmt.n(k.resort)}`;
+    `City ${fmt.n(k.city || 0)} · Resort ${fmt.n(k.resort || 0)}`;
   document.getElementById("kpi-cancel").textContent = fmt.pct(k.cancelRate);
+  const y0 = D.years[0];
+  const yN = D.years[D.years.length - 1];
   document.getElementById("kpi-cancel-sub").textContent =
-    `${fmt.n(k.canceled)} canceled · 2023 ${fmt.pct(D.years[0].cancel)} → 2025 ${fmt.pct(D.years[2].cancel)}`;
+    y0 && yN
+      ? `${fmt.n(k.canceled)} canceled · ${y0.year} ${fmt.pct(y0.cancel)} → ${yN.year} ${fmt.pct(yN.cancel)}`
+      : `${fmt.n(k.canceled)} canceled`;
   document.getElementById("kpi-realized").textContent = fmt.n(k.realized);
-  document.getElementById("kpi-adr").textContent = fmt.adr(k.adr);
-  document.getElementById("kpi-adr-sub").textContent = `Gross room revenue ${fmt.usd(k.grossRevenue)}`;
-  document.getElementById("kpi-nights").textContent = Number(k.avgNights).toFixed(2);
-  document.getElementById("kpi-rar").textContent = fmt.usd(k.revenueAtRisk);
+  document.getElementById("kpi-adr").textContent = fmt.adr(k.adr || 0);
+  document.getElementById("kpi-adr-sub").textContent = `Gross room revenue ${fmt.usd(k.grossRevenue || 0)}`;
+  document.getElementById("kpi-nights").textContent = Number(k.avgNights || 0).toFixed(2);
+  document.getElementById("kpi-rar").textContent = fmt.usd(k.revenueAtRisk || 0);
 }
 
 function dual(ctx, labels, bars, adr, cancel, barTitle) {
+  const old = Chart.getChart(ctx);
+  if (old) old.destroy();
   return new Chart(ctx, {
     type: "bar",
     data: {
@@ -73,8 +79,15 @@ function dual(ctx, labels, bars, adr, cancel, barTitle) {
   });
 }
 
+function chartOf(id, config) {
+  const el = document.getElementById(id);
+  const old = Chart.getChart(el);
+  if (old) old.destroy();
+  return new Chart(el, config);
+}
+
 function initCharts() {
-  new Chart(document.getElementById("chart-year"), {
+  chartOf("chart-year", {
     type: "bar",
     data: {
       labels: D.years.map((y) => String(y.year || y.name)),
@@ -95,7 +108,7 @@ function initCharts() {
     }
   });
 
-  new Chart(document.getElementById("chart-hotel"), {
+  chartOf("chart-hotel", {
     type: "bar",
     data: {
       labels: D.hotels.map((h) => h.name),
@@ -132,7 +145,7 @@ function initCharts() {
     segs.map((d) => d.cancel * 100)
   );
 
-  new Chart(document.getElementById("chart-agents"), {
+  chartOf("chart-agents", {
     type: "bar",
     data: {
       labels: D.agents.map((a) => a.name),
@@ -156,7 +169,7 @@ function initCharts() {
     D.party.map((d) => d.cancel * 100)
   );
 
-  new Chart(document.getElementById("chart-lead"), {
+  chartOf("chart-lead", {
     type: "bar",
     data: {
       labels: D.lead.map((d) => d.name),
@@ -175,7 +188,7 @@ function initCharts() {
     }
   });
 
-  new Chart(document.getElementById("chart-lead-ota"), {
+  chartOf("chart-lead-ota", {
     type: "line",
     data: {
       labels: D.leadOta.map((d) => d.bin),
@@ -191,7 +204,7 @@ function initCharts() {
     }
   });
 
-  new Chart(document.getElementById("chart-req"), {
+  chartOf("chart-req", {
     type: "bar",
     data: {
       labels: D.requests.map((d) => String(d.n)),
@@ -220,7 +233,7 @@ function initCharts() {
     D.segments.find((s) => s.name === "Direct")
   ].filter(Boolean);
 
-  new Chart(document.getElementById("chart-intent"), {
+  chartOf("chart-intent", {
     type: "bar",
     data: {
       labels: intent.map((d) => d.name),
@@ -357,17 +370,17 @@ function simulate() {
   document.getElementById("lab-fence").textContent = (fence * 100).toFixed(0) + "%";
   document.getElementById("lab-loyal").textContent = (loyalty * 100).toFixed(0) + "%";
 
-  const ota = D.segments.find((s) => s.name === "Online TA");
+  const ota = D.segments.find((s) => s.name === "Online TA") || { bookings: 0, cancel: 0, adr: 0, nights: 1 };
   const moved = ota.bookings * otaShift;
-  const extraStays = moved * (ota.cancel - D.kpis.directCancel);
-  const extraRev = extraStays * ota.adr * ota.nights;
+  const extraStays = moved * (ota.cancel - (D.kpis.directCancel || 0));
+  const extraRev = extraStays * ota.adr * (ota.nights || 1);
 
-  const longOta = D.leadOta.slice(1).reduce((s, r) => s + r.otaN, 0);
+  const longOta = D.leadOta.slice(1).reduce((s, r) => s + (r.otaN || 0), 0);
   const fenced = longOta * fence;
-  const extraFence = fenced * (0.39 - D.kpis.directCancel);
+  const extraFence = fenced * (0.39 - (D.kpis.directCancel || 0));
 
-  const first = D.loyalty.find((x) => x.name === "First-time guest");
-  const repeat = D.loyalty.find((x) => x.name === "Repeat guest");
+  const first = D.loyalty.find((x) => x.name === "First-time guest") || { bookings: 0, cancel: 0 };
+  const repeat = D.loyalty.find((x) => x.name === "Repeat guest") || { cancel: 0 };
   const converted = first.bookings * loyalty;
   const extraLoyal = converted * (first.cancel - repeat.cancel);
 
@@ -377,6 +390,139 @@ function simulate() {
     Fencing ${fmt.pct(fence)} of Online TA bookings made 31+ days out, if their cancel fell to the Direct rate, ≈ <strong>${fmt.n(extraFence)}</strong> extra stays.<br><br>
     Converting ${fmt.pct(loyalty)} of first-timers to repeat-guest cancel rates ≈ <strong>${fmt.n(extraLoyal)}</strong> extra stays.
   `;
+}
+
+function fillInsights() {
+  const ota = D.segments.find((s) => s.name === "Online TA");
+  const direct = D.segments.find((s) => s.name === "Direct");
+  const park = D.parking.find((x) => x.name.includes("Parking requested"));
+  const room = D.rooms.find((x) => x.name.includes("≠"));
+  const aug = D.months.find((m) => m.m === "Aug");
+  const winter = D.months.filter((m) => ["Nov", "Jan"].includes(m.m));
+  const otaBin = D.leadOta.find((x) => x.bin === "31–60 days");
+  const cards = [
+    {
+      id: "I1",
+      color: "#c45c26",
+      title: "Online TA is volume-heavy but cancellation-heavy",
+      text: ota && direct
+        ? `Online TA represents ${fmt.pct(D.kpis.otaShare)} of bookings with ${fmt.pct(ota.cancel)} cancellation. Direct has ADR ${fmt.adr(direct.adr)} vs ${fmt.adr(ota.adr)} for Online TA, and only ${fmt.pct(direct.cancel)} cancellation.`
+        : "Online TA is not present in the current filter."
+    },
+    {
+      id: "I2",
+      color: "#0a2540",
+      title: "Long lead-time OTA bookings need earlier fences",
+      text: otaBin
+        ? `Online TA cancellation is ${fmt.pct(otaBin.ota)} in the 31–60 day window (${fmt.n(otaBin.otaN)} bookings). Waiting until very close to arrival is too late.`
+        : "Not enough Online TA lead-time rows in the current filter."
+    },
+    {
+      id: "I3",
+      color: "#b8860b",
+      title: "Peak season needs protection, winter needs filling",
+      text: aug
+        ? `August has ${fmt.n(aug.bookings)} bookings and ${fmt.adr(aug.adr)} ADR, with ${fmt.usd(aug.revenueAtRisk)} sitting in canceled stays. November–January remains the safer window for flexible volume offers.`
+        : "August is not in the current month filter."
+    },
+    {
+      id: "I4",
+      color: "#1f7a66",
+      title: "Commitment signals should drive operations",
+      text: `Parking requested cancel ${park ? fmt.pct(park.cancel) : "n/a"}. Assigned ≠ reserved cancel ${room ? fmt.pct(room.cancel) : "n/a"}. Repeat-guest share is ${fmt.pct(D.kpis.repeatRate)}. These beat party type as arrival-risk scores.`
+    }
+  ];
+  document.getElementById("insight-cards").innerHTML = cards.map((c) => `
+    <article class="insight-card">
+      <div class="badge" style="background:${c.color}">${c.id}</div>
+      <div>
+        <h3>${c.title}</h3>
+        <p class="hint">${c.text}</p>
+      </div>
+    </article>
+  `).join("");
+}
+
+function currentFilter() {
+  return {
+    hotel: document.getElementById("f-hotel").value,
+    year: document.getElementById("f-year").value,
+    month: document.getElementById("f-month").value,
+    seg: document.getElementById("f-seg").value,
+    party: document.getElementById("f-party").value,
+    loyal: document.getElementById("f-loyal").value,
+    park: document.getElementById("f-park").value,
+    deposit: document.getElementById("f-deposit").value,
+    change: document.getElementById("f-change").value,
+    leadMin: Number(document.getElementById("f-lead-min").value),
+    leadMax: Number(document.getElementById("f-lead-max").value)
+  };
+}
+
+function applyFilters() {
+  const f = currentFilter();
+  if (f.leadMin > f.leadMax) {
+    const t = f.leadMin;
+    f.leadMin = f.leadMax;
+    f.leadMax = t;
+  }
+  document.getElementById("f-lead-lab").textContent = f.leadMin + "–" + f.leadMax;
+  D = window.computeDashboard(f);
+  document.getElementById("filter-count").textContent = fmt.n(D.kpis.filterCount);
+  document.getElementById("filter-pct").textContent = fmt.pct(D.kpis.filterShare) + " of all bookings";
+  let act = 0;
+  ["hotel", "year", "month", "seg", "party", "loyal", "park", "deposit", "change"].forEach((k) => {
+    if (f[k] !== "") act += 1;
+  });
+  if (f.leadMin > 0 || f.leadMax < 800) act += 1;
+  document.getElementById("filter-status").textContent = act ? act + " active filter" + (act > 1 ? "s" : "") : "No active filters";
+  const activeId = document.querySelector("nav.tabs button.active").dataset.view;
+  document.querySelectorAll(".view").forEach((v) => {
+    v.hidden = false;
+    v.classList.add("active");
+  });
+  initKpis();
+  initCharts();
+  fillTables();
+  fillInsights();
+  simulate();
+  document.querySelectorAll(".view").forEach((v) => {
+    const on = v.id === activeId;
+    v.classList.toggle("active", on);
+    v.hidden = !on;
+  });
+}
+
+function bindFilters() {
+  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const monthSel = document.getElementById("f-month");
+  months.forEach((name, i) => {
+    const opt = document.createElement("option");
+    opt.value = String(i);
+    opt.textContent = name;
+    monthSel.appendChild(opt);
+  });
+  ["f-hotel", "f-year", "f-month", "f-seg", "f-party", "f-loyal", "f-park", "f-deposit", "f-change", "f-lead-min", "f-lead-max"].forEach((id) => {
+    document.getElementById(id).addEventListener("input", applyFilters);
+    document.getElementById(id).addEventListener("change", applyFilters);
+  });
+  document.getElementById("filter-reset").addEventListener("click", () => {
+    ["f-hotel", "f-year", "f-month", "f-seg", "f-party", "f-loyal", "f-park", "f-deposit", "f-change"].forEach((id) => {
+      document.getElementById(id).value = "";
+    });
+    document.getElementById("f-lead-min").value = "0";
+    document.getElementById("f-lead-max").value = "800";
+    applyFilters();
+  });
+  document.getElementById("more-toggle").addEventListener("click", () => {
+    const box = document.getElementById("more-filters");
+    const open = box.hidden;
+    box.hidden = !open;
+    document.getElementById("more-toggle").setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  document.getElementById("filter-open").addEventListener("click", () => {
+    document.getElementById("filter-panel").classList.toggle("open");
+  });
 }
 
 function bindTabs() {
@@ -405,20 +551,26 @@ function bindTabs() {
   });
 }
 
-initKpis();
-document.querySelectorAll(".view").forEach((v) => {
-  v.hidden = false;
-  v.classList.add("active");
-});
-initCharts();
-fillTables();
-document.querySelectorAll(".view").forEach((v) => {
-  const on = v.id === "view-health";
-  v.classList.toggle("active", on);
-  v.hidden = !on;
-});
 bindTabs();
-simulate();
+bindFilters();
+if (window.BOOKINGS && window.computeDashboard) {
+  applyFilters();
+} else {
+  initKpis();
+  document.querySelectorAll(".view").forEach((v) => {
+    v.hidden = false;
+    v.classList.add("active");
+  });
+  initCharts();
+  fillTables();
+  fillInsights();
+  document.querySelectorAll(".view").forEach((v) => {
+    const on = v.id === "view-health";
+    v.classList.toggle("active", on);
+    v.hidden = !on;
+  });
+  simulate();
+}
 window.addEventListener("resize", () => {
   requestAnimationFrame(() => {
     document.querySelectorAll("canvas").forEach((c) => {
