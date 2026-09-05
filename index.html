@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Hotel Booking Demand Intelligence</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
@@ -22,6 +22,7 @@
       <span class="chip">Arrival years 2023–2025</span>
       <span class="chip">Revenue = ADR × nights stayed</span>
       <span class="chip">Data Analysis 1 · 2 · 3</span>
+      <a class="chip" href="cleaning-slides.html">Data cleaning slides</a>
     </div>
   </header>
 
@@ -60,12 +61,15 @@
       </div>
       <div class="card" style="margin-top:14px">
         <h3>Numbers behind the charts</h3>
+        <p class="swipe-hint">Swipe sideways to see every column</p>
+        <div class="table-wrap" tabindex="0">
         <table>
           <thead>
             <tr><th>Cut</th><th class="num">Bookings</th><th class="num">Canceled</th><th class="num">Cancel %</th><th class="num">ADR</th><th class="num">Avg nights</th><th class="num">Revenue at risk</th></tr>
           </thead>
           <tbody id="tbl-health"></tbody>
         </table>
+        </div>
       </div>
     </section>
 
@@ -84,10 +88,13 @@
       </div>
       <div class="card" style="margin-top:14px">
         <h3>Month detail</h3>
+        <p class="swipe-hint">Swipe sideways to see every column</p>
+        <div class="table-wrap" tabindex="0">
         <table>
           <thead><tr><th>Month</th><th class="num">Bookings</th><th class="num">Cancel %</th><th class="num">ADR</th><th class="num">Avg nights</th><th class="num">Gross revenue</th><th class="num">In canceled stays</th></tr></thead>
           <tbody id="tbl-month"></tbody>
         </table>
+        </div>
       </div>
     </section>
 
@@ -113,10 +120,13 @@
       </figure>
       <div class="card" style="margin-top:14px">
         <h3>Channel and guest-mix table (expected kept revenue per booking = ADR × (1 − cancel) × nights)</h3>
+        <p class="swipe-hint">Swipe sideways to see every column</p>
+        <div class="table-wrap" tabindex="0">
         <table>
           <thead><tr><th>Group</th><th class="num">Bookings</th><th class="num">Share</th><th class="num">Cancel %</th><th class="num">ADR</th><th class="num">Expected kept $</th></tr></thead>
           <tbody id="tbl-channel"></tbody>
         </table>
+        </div>
       </div>
     </section>
 
